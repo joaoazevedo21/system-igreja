@@ -1,7 +1,8 @@
 import axios from "axios";
 
+// 🔥 BASE DINÂMICA (LOCAL + PRODUÇÃO)
 const api = axios.create({
-  baseURL: "http://localhost:3000"
+  baseURL: process.env.REACT_APP_API_URL || "http://localhost:3000"
 });
 
 // 🔐 INTERCEPTOR → envia token automaticamente
@@ -20,7 +21,7 @@ api.interceptors.request.use(
   }
 );
 
-// ⚠️ INTERCEPTOR DE RESPOSTA (opcional mas profissional)
+// ⚠️ INTERCEPTOR DE RESPOSTA (PROFISSIONAL)
 api.interceptors.response.use(
   (response) => response,
   (error) => {
