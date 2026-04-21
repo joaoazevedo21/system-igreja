@@ -102,7 +102,7 @@ const styles = {
   },
   card: {
     background: "#ffffff",
-    padding: "40px",
+    padding: "45px",
     borderRadius: "12px",
     width: "350px",
     textAlign: "center",
@@ -112,7 +112,7 @@ const styles = {
     marginBottom: "20px"
   },
   input: {
-    width: "100%",
+    width: "93%",
     padding: "12px",
     marginBottom: "15px",
     borderRadius: "6px",

@@ -1,3 +1,5 @@
+require("dotenv").config(); // 🔥 NOVO (variáveis de ambiente)
+
 const express = require("express");
 const cors = require("cors");
 
@@ -18,15 +20,26 @@ const pool = require("./config/db");
 const app = express();
 
 
-// 🔥 ================= CORS (ANTES DE TUDO) =================
+// 🔥 ================= CORS INTELIGENTE =================
+const allowedOrigins = [
+  "http://localhost:3001", // local frontend
+  process.env.FRONTEND_URL // produção (Vercel)
+];
+
 app.use(cors({
-  origin: "http://localhost:3001",
+  origin: function (origin, callback) {
+    // permite chamadas tipo Postman / sem origin
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error("CORS bloqueado"));
+    }
+  },
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
-
-// 🔥 Preflight (resolve erros avançados de CORS)
-//app.options("/*", cors());
 
 
 // 🔥 ================= MIDDLEWARE =================
@@ -65,7 +78,9 @@ app.get("/test-db", async (req, res) => {
 });
 
 
-// 🔥 ================= START SERVER =================
-app.listen(3000, () => {
-  console.log("🚀 ola babu, o programa esta a funcionar bem: 3000");
+// 🔥 ================= PORTA DINÂMICA =================
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`🚀 Servidor rodando na porta ${PORT}`);
 });
