@@ -117,5 +117,9 @@ router.get("/test-db", async (req, res) => {
     res.status(500).send("Erro na conexão com banco");
   }
 });
+router.get("/debug-users", async (req, res) => {
+  const result = await pool.query("SELECT * FROM usuarios");
+  res.json(result.rows);
+});
 
 module.exports = router;
