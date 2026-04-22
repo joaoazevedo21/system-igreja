@@ -97,5 +97,14 @@ router.get("/perfil", verificarToken, async (req, res) => {
     res.status(500).send("Erro ao buscar perfil");
   }
 });
+router.get("/debug-users", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM usuarios");
+    res.json(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Erro ao buscar usuários");
+  }
+});
 
 module.exports = router;
