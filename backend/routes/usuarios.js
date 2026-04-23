@@ -23,13 +23,19 @@ router.post("/register", async (req, res) => {
     res.json(usuario.rows[0]);
 
   } catch (error) {
-    console.error(error);
+    console.error("ERRO REGISTER:", error);
+
+    // 🔥 TRATAMENTO DO EMAIL DUPLICADO
+    if (error.code === "23505") {
+      return res.status(400).send("Email já existe");
+    }
+
     res.status(500).send("Erro ao cadastrar o usuario");
   }
 });
 
 
-// ================= LOGIN (CORRIGIDO) =================
+// ================= LOGIN =================
 router.post("/login", async (req, res) => {
   const { email, senha } = req.body;
 
@@ -54,7 +60,6 @@ router.post("/login", async (req, res) => {
       return res.status(400).send("Senha incorreta");
     }
 
-    // 🔥 CORREÇÃO IMPORTANTE AQUI
     const token = jwt.sign(
       {
         id: usuarioEncontrado.id,
@@ -76,7 +81,7 @@ router.post("/login", async (req, res) => {
     });
 
   } catch (error) {
-    console.error(error);
+    console.error("ERRO LOGIN:", error);
     res.status(500).send("Erro no login");
   }
 });
@@ -97,6 +102,9 @@ router.get("/perfil", verificarToken, async (req, res) => {
     res.status(500).send("Erro ao buscar perfil");
   }
 });
+
+
+// ================= DEBUG USERS =================
 router.get("/debug-users", async (req, res) => {
   try {
     const result = await pool.query("SELECT * FROM usuarios");
@@ -107,6 +115,7 @@ router.get("/debug-users", async (req, res) => {
   }
 });
 
+
 // ================= TESTE DB =================
 router.get("/test-db", async (req, res) => {
   try {
@@ -116,10 +125,6 @@ router.get("/test-db", async (req, res) => {
     console.error(error);
     res.status(500).send("Erro na conexão com banco");
   }
-});
-router.get("/debug-users", async (req, res) => {
-  const result = await pool.query("SELECT * FROM usuarios");
-  res.json(result.rows);
 });
 
 module.exports = router;

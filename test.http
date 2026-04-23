@@ -1,0 +1,9 @@
+POST https://system-igreja-backend.onrender.com/usuarios/register
+Content-Type: application/json
+
+{
+  "nome": "Admin Teste",
+  "email": "teste@gmail.com",
+  "senha": "123456",
+  "tipo": "lider"
+}

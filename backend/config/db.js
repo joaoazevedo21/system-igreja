@@ -1,6 +1,6 @@
 const { Pool } = require("pg");
 
-// 🔥 PRODUÇÃO (Render / Neon)
+// 🔥 SE ESTIVER EM PRODUÇÃO (Render / Neon)
 const pool = process.env.DATABASE_URL
   ? new Pool({
       connectionString: process.env.DATABASE_URL,
@@ -9,7 +9,7 @@ const pool = process.env.DATABASE_URL
       }
     })
 
-  // 🔥 LOCAL (teu computador)
+  // 🔥 SENÃO (LOCAL - teu código atual mantido)
   : new Pool({
       user: "postgres",
       host: "localhost",
@@ -17,5 +17,6 @@ const pool = process.env.DATABASE_URL
       password: "Mauricior7",
       port: 5432
     });
+    
 
 module.exports = pool;
