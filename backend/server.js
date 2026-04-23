@@ -1,4 +1,4 @@
-require("dotenv").config(); // 🔥 NOVO (variáveis de ambiente)
+require("dotenv").config();
 
 const express = require("express");
 const cors = require("cors");
@@ -20,30 +20,22 @@ const pool = require("./config/db");
 const app = express();
 
 
-// 🔥 ================= CORS INTELIGENTE =================
-const allowedOrigins = [
-  "http://localhost:3001", // local frontend
-  process.env.FRONTEND_URL // produção (Vercel)
-];
-
-app.use(cors({
-  origin: function (origin, callback) {
-    // permite chamadas tipo Postman / sem origin
-    if (!origin) return callback(null, true);
-
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    } else {
-      return callback(new Error("CORS bloqueado"));
-    }
-  },
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"]
-}));
-
-
 // 🔥 ================= MIDDLEWARE =================
+
+// 👉 ESSA LINHA TEM QUE VIR PRIMEIRO
 app.use(express.json());
+
+// 👉 opcional mas ajuda
+app.use(express.urlencoded({ extended: true }));
+
+
+// 🔥 ================= CORS =================
+
+// ⚠️ versão mais segura e sem travar testes
+app.use(cors({
+  origin: true,
+  credentials: true
+}));
 
 
 // 🔥 ================= ROTAS =================
@@ -78,8 +70,8 @@ app.get("/test-db", async (req, res) => {
 });
 
 
-// 🔥 ================= PORTA DINÂMICA =================
-const PORT = process.env.PORT || 3000;
+// 🔥 ================= PORTA =================
+const PORT = process.env.PORT || 10000;
 
 app.listen(PORT, () => {
   console.log(`🚀 Babu o teu projeto esta funcionando de boa na porta: ${PORT}`);
