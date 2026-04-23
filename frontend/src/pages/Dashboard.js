@@ -35,30 +35,14 @@ function Dashboard() {
 
     try {
 
-      const token = localStorage.getItem("token"); // 🔥 ADICIONADO
-
-      const res = await api.get("/estatisticas", {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
+      // 🔥 SEM TOKEN MANUAL (interceptor já faz isso)
+      const res = await api.get("/estatisticas");
       setDados(res.data);
 
-      const membros = await api.get("/relatorios/membros-por-departamento", {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
+      const membros = await api.get("/relatorios/membros-por-departamento");
       setMembrosDepto(membros.data);
 
-      const dizimos = await api.get("/relatorios/dizimos-por-departamento", {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
+      const dizimos = await api.get("/relatorios/dizimos-por-departamento");
       setDizimosDepto(dizimos.data);
 
       toast.success("Dashboard carregado com sucesso");
@@ -78,15 +62,9 @@ function Dashboard() {
 
     try {
 
-      const token = localStorage.getItem("token"); // 🔥 ADICIONADO
-
+      // 🔥 SEM TOKEN MANUAL
       const res = await api.get(
-        `/relatorios/dizimos-por-departamento?inicio=${dataInicio}&fim=${dataFim}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
+        `/relatorios/dizimos-por-departamento?inicio=${dataInicio}&fim=${dataFim}`
       );
 
       setDizimosDepto(res.data);
