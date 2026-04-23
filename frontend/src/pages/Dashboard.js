@@ -35,13 +35,30 @@ function Dashboard() {
 
     try {
 
-      const res = await api.get("/estatisticas");
+      const token = localStorage.getItem("token"); // 🔥 ADICIONADO
+
+      const res = await api.get("/estatisticas", {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
       setDados(res.data);
 
-      const membros = await api.get("/relatorios/membros-por-departamento");
+      const membros = await api.get("/relatorios/membros-por-departamento", {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
       setMembrosDepto(membros.data);
 
-      const dizimos = await api.get("/relatorios/dizimos-por-departamento");
+      const dizimos = await api.get("/relatorios/dizimos-por-departamento", {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
       setDizimosDepto(dizimos.data);
 
       toast.success("Dashboard carregado com sucesso");
@@ -61,8 +78,15 @@ function Dashboard() {
 
     try {
 
+      const token = localStorage.getItem("token"); // 🔥 ADICIONADO
+
       const res = await api.get(
-        `/relatorios/dizimos-por-departamento?inicio=${dataInicio}&fim=${dataFim}`
+        `/relatorios/dizimos-por-departamento?inicio=${dataInicio}&fim=${dataFim}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
       );
 
       setDizimosDepto(res.data);
