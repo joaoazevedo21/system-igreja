@@ -2,29 +2,29 @@ const jwt = require("jsonwebtoken");
 
 function verificarToken(req, res, next) {
 
-    // 🔥 LIBERA PRE-FLIGHT (CORS)
+    // 🔥 Permitir preflight CORS
     if (req.method === "OPTIONS") {
         return next();
     }
 
     let token = req.headers["authorization"];
 
-    // verificar se o token tem "Bearer "
-    if (token && token.startsWith("Bearer ")) {
-        token = token.slice(7);
+    // ❌ sem token
+    if (!token) {
+        return res.status(401).send("Token não fornecido");
     }
 
-    // se não existir token
-    if (!token) {
-        return res.status(403).send("Token não fornecido");
+    // remover "Bearer "
+    if (token.startsWith("Bearer ")) {
+        token = token.slice(7);
     }
 
     try {
 
-        // verificar token
+        // 🔐 validar token
         const decoded = jwt.verify(token, "segredo_super");
 
-        // guardar dados do usuário
+        // guardar dados do utilizador
         req.usuarioId = decoded.id;
         req.usuarioTipo = decoded.tipo;
 
@@ -35,7 +35,6 @@ function verificarToken(req, res, next) {
         return res.status(401).send("Token inválido");
 
     }
-
 }
 
 module.exports = verificarToken;

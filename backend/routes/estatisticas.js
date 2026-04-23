@@ -5,32 +5,32 @@ const verificarToken = require("../autenticar/auth");
 
 router.get("/", verificarToken, async (req, res) => {
 
-  try {
+    try {
 
-    const totalMembros = await pool.query(
-      "SELECT COUNT(*) FROM membros"
-    );
+        const totalMembros = await pool.query(
+            "SELECT COUNT(*) FROM membros"
+        );
 
-    const totalDepartamentos = await pool.query(
-      "SELECT COUNT(*) FROM departamentos"
-    );
+        const totalDepartamentos = await pool.query(
+            "SELECT COUNT(*) FROM departamentos"
+        );
 
-    const totalDizimos = await pool.query(
-      "SELECT COALESCE(SUM(valor),0) FROM dizimos"
-    );
+        const totalDizimos = await pool.query(
+            "SELECT COALESCE(SUM(valor),0) AS total FROM dizimos"
+        );
 
-    res.json({
-      total_membros: totalMembros.rows[0].count,
-      total_departamentos: totalDepartamentos.rows[0].count,
-      total_dizimos: totalDizimos.rows[0].coalesce
-    });
+        res.json({
+            total_membros: parseInt(totalMembros.rows[0].count),
+            total_departamentos: parseInt(totalDepartamentos.rows[0].count),
+            total_dizimos: parseFloat(totalDizimos.rows[0].total)
+        });
 
-  } catch (error) {
+    } catch (error) {
 
-    console.error(error);
-    res.status(500).send("Erro ao buscar estatísticas");
+        console.error(error);
+        res.status(500).send("Erro ao buscar estatísticas");
 
-  }
+    }
 
 });
 
