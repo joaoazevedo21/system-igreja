@@ -12,7 +12,6 @@ function Login() {
   const navigate = useNavigate();
 
   async function fazerLogin(e) {
-
     e.preventDefault();
     setLoading(true);
 
@@ -23,19 +22,35 @@ function Login() {
         senha
       });
 
-      // 🔥 salva token
-      localStorage.setItem("token", response.data.token);
+      // 🔍 DEBUG
+      console.log("RESPOSTA LOGIN:", response.data);
 
-      // 🔥 CORRIGIDO: salva usuário
-      localStorage.setItem(
-        "usuario",
-        JSON.stringify(response.data.usuario)
-      );
+      // 🔒 VERIFICA SE TEM TOKEN
+      if (response.data && response.data.token) {
 
-      navigate("/dashboard");
+        // 🔥 salva token
+        localStorage.setItem("token", response.data.token);
+
+        // 🔥 salva usuário
+        localStorage.setItem(
+          "usuario",
+          JSON.stringify(response.data.usuario)
+        );
+
+        // 🔍 CONFIRMA
+        console.log("TOKEN SALVO:", localStorage.getItem("token"));
+
+        // 🔥 delay para garantir salvamento antes de redirecionar
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 200);
+
+      } else {
+        alert("Erro: token não recebido do servidor");
+      }
 
     } catch (error) {
-      console.error(error);
+      console.error("ERRO LOGIN:", error);
       alert("Email ou senha incorretos");
     }
 
