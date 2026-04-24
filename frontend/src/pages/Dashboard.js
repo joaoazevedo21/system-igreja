@@ -35,7 +35,7 @@ function Dashboard() {
 
     try {
 
-      // 🔥 SEM TOKEN MANUAL (interceptor já faz isso)
+      // 🔥 SEM TOKEN MANUAL (INTERCEPTOR FAZ ISSO)
       const res = await api.get("/estatisticas");
       setDados(res.data);
 
@@ -104,28 +104,19 @@ function Dashboard() {
 
       <h1>📊 Painel de Controle Inteligente</h1>
 
-      {/* CARDS */}
       <div style={styles.cards}>
-
         <div style={styles.cardGreen}>👥 {dados.total_membros}</div>
         <div style={styles.cardBlue}>📁 {dados.total_departamentos}</div>
         <div style={styles.cardYellow}>💰 {dados.total_dizimos} Kz</div>
-
       </div>
 
-      {/* FILTRO DATA */}
       <div style={styles.filtro}>
-
         <input type="date" onChange={(e) => setDataInicio(e.target.value)} />
         <input type="date" onChange={(e) => setDataFim(e.target.value)} />
-
         <button onClick={filtrarDizimos}>Filtrar</button>
-
       </div>
 
-      {/* GRÁFICOS */}
       <div style={styles.grid}>
-
         <div style={styles.box}>
           <h3>Membros por Departamento</h3>
           <Bar data={dataMembros} />
@@ -135,7 +126,6 @@ function Dashboard() {
           <h3>Dízimos por Departamento</h3>
           <Bar data={dataDizimos} />
         </div>
-
       </div>
 
     </Layout>
@@ -144,13 +134,11 @@ function Dashboard() {
 }
 
 const styles = {
-
   cards: {
     display: "flex",
     gap: "15px",
     marginBottom: "20px"
   },
-
   cardGreen: {
     flex: 1,
     background: "#27ae60",
@@ -158,7 +146,6 @@ const styles = {
     padding: "20px",
     borderRadius: "10px"
   },
-
   cardBlue: {
     flex: 1,
     background: "#2980b9",
@@ -166,7 +153,6 @@ const styles = {
     padding: "20px",
     borderRadius: "10px"
   },
-
   cardYellow: {
     flex: 1,
     background: "#f39c12",
@@ -174,25 +160,21 @@ const styles = {
     padding: "20px",
     borderRadius: "10px"
   },
-
   filtro: {
     display: "flex",
     gap: "10px",
     marginBottom: "20px"
   },
-
   grid: {
     display: "grid",
     gridTemplateColumns: "1fr 1fr",
     gap: "20px"
   },
-
   box: {
     background: "#fff",
     padding: "20px",
     borderRadius: "10px"
   }
-
 };
 
 export default Dashboard;
