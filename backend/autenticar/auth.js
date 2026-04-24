@@ -7,22 +7,29 @@ function verificarToken(req, res, next) {
         return next();
     }
 
-    let token = req.headers["authorization"];
+    const authHeader = req.headers.authorization;
 
-    // verificar se o token tem "Bearer "
-    if (token && token.startsWith("Bearer ")) {
-        token = token.slice(7);
-    }
+    // 🔥 DEBUG (opcional)
+    console.log("HEADER RECEBIDO:", authHeader);
 
-    // se não existir token
-    if (!token) {
+    // se não existir header
+    if (!authHeader) {
         return res.status(403).send("Token não fornecido");
     }
 
+    // formato: Bearer TOKEN
+    const partes = authHeader.split(" ");
+
+    if (partes.length !== 2) {
+        return res.status(401).send("Token mal formatado");
+    }
+
+    const token = partes[1];
+
     try {
 
-        // verificar token
-        const decoded = jwt.verify(token, "segredo_super");
+        // 🔥 USAR A MESMA CHAVE DO LOGIN
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
         // guardar dados do usuário
         req.usuarioId = decoded.id;
@@ -32,6 +39,7 @@ function verificarToken(req, res, next) {
 
     } catch (error) {
 
+        console.error("ERRO TOKEN:", error.message);
         return res.status(401).send("Token inválido");
 
     }
