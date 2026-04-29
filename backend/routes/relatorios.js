@@ -31,8 +31,8 @@ router.get(
 
             let query = `
                 SELECT 
-                    d.nome AS departamento, 
-                    SUM(z.valor) AS total_dizimos
+                    COALESCE(d.nome, 'Sem departamento') AS departamento, 
+                    COALESCE(SUM(z.valor), 0) AS total_dizimos
                 FROM dizimos z
                 LEFT JOIN departamentos d ON z.departamento_id = d.id
             `;
@@ -55,7 +55,7 @@ router.get(
             res.json(resultado.rows);
 
         } catch (error) {
-            console.error(error);
+            console.error("ERRO DIZIMOS:", error);
             res.status(500).send("Erro ao gerar relatório de dízimos por departamento");
         }
     }
@@ -70,13 +70,13 @@ router.get(
     async (req, res) => {
         try {
             const resultado = await pool.query(
-                "SELECT SUM(valor) AS total_geral FROM dizimos"
+                "SELECT COALESCE(SUM(valor),0) AS total_geral FROM dizimos"
             );
 
             res.json(resultado.rows[0]);
 
         } catch (error) {
-            console.error(error);
+            console.error("ERRO TOTAL DIZIMOS:", error);
             res.status(500).send("Erro ao calcular total geral de dízimos");
         }
     }
@@ -92,7 +92,7 @@ router.get(
         try {
             const resultado = await pool.query(
 `SELECT 
-    d.nome AS departamento, 
+    COALESCE(d.nome, 'Sem departamento') AS departamento, 
     COUNT(m.id) AS total_membros
 FROM membros m
 LEFT JOIN departamentos d ON m.departamento_id = d.id
@@ -103,7 +103,7 @@ ORDER BY d.nome ASC`
             res.json(resultado.rows);
 
         } catch (error) {
-            console.error(error);
+            console.error("ERRO MEMBROS:", error);
             res.status(500).send("Erro ao gerar relatório de membros por departamento");
         }
     }
