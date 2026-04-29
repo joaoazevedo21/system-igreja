@@ -7,32 +7,64 @@ import Membros from "./pages/Membros";
 import Departamentos from "./pages/Departamentos";
 import Usuarios from "./pages/Usuarios";
 
-// 🔥 TOAST NOTIFICATIONS
+// 🔥 TOAST
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+
+
+// ================= 🔐 FUNÇÃO VALIDAR TOKEN =================
+function tokenValido() {
+
+  const token = localStorage.getItem("token");
+
+  if (!token) return false;
+
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+
+    // 🔥 verifica expiração
+    if (payload.exp * 1000 < Date.now()) {
+      localStorage.clear();
+      return false;
+    }
+
+    return true;
+
+  } catch (error) {
+    localStorage.clear();
+    return false;
+  }
+}
 
 
 // ================= ROTAS PRIVADAS =================
 function PrivateRoute({ children }) {
 
-  const token = localStorage.getItem("token");
-
-  return token ? children : <Navigate to="/" />;
+  return tokenValido()
+    ? children
+    : <Navigate to="/" />;
 }
 
 
-// ================= ROTAS ADMIN (MELHORADO) =================
+// ================= ROTAS ADMIN =================
 function AdminRoute({ children }) {
 
   let user = null;
 
   try {
     const data = localStorage.getItem("usuario");
+
     if (data && data !== "undefined") {
       user = JSON.parse(data);
     }
-  } catch (error) {
+
+  } catch {
     user = null;
+  }
+
+  // 🔥 valida token + tipo
+  if (!tokenValido()) {
+    return <Navigate to="/" />;
   }
 
   return user?.tipo === "admin"
@@ -48,7 +80,6 @@ function App() {
 
     <BrowserRouter>
 
-      {/* 🔥 NOTIFICAÇÕES GLOBAIS */}
       <ToastContainer />
 
       <Routes>
@@ -76,7 +107,7 @@ function App() {
           }
         />
 
-        {/* DEPARTAMENTOS (ADMIN) */}
+        {/* DEPARTAMENTOS */}
         <Route
           path="/departamentos"
           element={
@@ -88,7 +119,7 @@ function App() {
           }
         />
 
-        {/* USUÁRIOS (ADMIN) */}
+        {/* USUÁRIOS */}
         <Route
           path="/usuarios"
           element={
@@ -100,7 +131,7 @@ function App() {
           }
         />
 
-        {/* 🔥 ROTAS INVÁLIDAS */}
+        {/* 🔥 ROTA INVÁLIDA */}
         <Route path="*" element={<Navigate to="/dashboard" />} />
 
       </Routes>
