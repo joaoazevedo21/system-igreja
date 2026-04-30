@@ -34,9 +34,37 @@ function Dashboard() {
   const [dataInicio, setDataInicio] = useState("");
   const [dataFim, setDataFim] = useState("");
 
+  // 🔥 NOVO: valida token antes de tudo
+  function tokenValido() {
+    const token = localStorage.getItem("token");
+
+    if (!token) return false;
+
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+
+      if (payload.exp * 1000 < Date.now()) {
+        localStorage.clear();
+        return false;
+      }
+
+      return true;
+
+    } catch {
+      localStorage.clear();
+      return false;
+    }
+  }
+
   async function carregarDados() {
 
     try {
+
+      // 🔥 BLOQUEIA se token inválido
+      if (!tokenValido()) {
+        window.location.href = "/";
+        return;
+      }
 
       const res = await api.get("/estatisticas");
       setDados(res.data);
@@ -59,6 +87,13 @@ function Dashboard() {
       toast.success("Dashboard carregado com sucesso");
 
     } catch (error) {
+
+      // 🔥 NOVO: tratamento inteligente
+      if (error.response?.status === 401) {
+        localStorage.clear();
+        window.location.href = "/";
+      }
+
       toast.error("Erro ao carregar dashboard");
       console.error(error);
     }
@@ -70,12 +105,26 @@ function Dashboard() {
 
   async function filtrarDizimos() {
     try {
+
+      if (!tokenValido()) {
+        window.location.href = "/";
+        return;
+      }
+
       const res = await api.get(
         `/relatorios/dizimos-por-departamento?inicio=${dataInicio}&fim=${dataFim}`
       );
+
       setDizimosDepto(res.data);
       toast.info("Filtro aplicado");
-    } catch {
+
+    } catch (error) {
+
+      if (error.response?.status === 401) {
+        localStorage.clear();
+        window.location.href = "/";
+      }
+
       toast.error("Erro ao filtrar dados");
     }
   }
@@ -129,6 +178,7 @@ function Dashboard() {
 
       <h1>📊 Painel de Controle Inteligente</h1>
 
+      {/* 🔥 TOTAL GERAL */}
       <div style={styles.totalGeral}>
         👥 Total Geral de Membros: <strong>{dados.total_membros}</strong>
       </div>
