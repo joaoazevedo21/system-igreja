@@ -26,7 +26,7 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
 
-    // 🔥 Se token expirar ou der erro 401
+    // 🔥 LOGOUT AUTOMÁTICO
     if (error.response && error.response.status === 401) {
       localStorage.clear();
       window.location.href = "/";
