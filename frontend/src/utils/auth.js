@@ -1,23 +1,45 @@
+// 🔐 PEGAR USUÁRIO
 export function getUsuario() {
-  return JSON.parse(localStorage.getItem("usuario"));
+  try {
+    return JSON.parse(localStorage.getItem("usuario"));
+  } catch {
+    return null;
+  }
 }
 
+// 🔐 ADMIN
 export function isAdmin() {
   const user = getUsuario();
   return user?.tipo === "admin";
 }
 
-// 🔥 NOVO → pegar token
+// 🔥 NOVOS TIPOS
+export function isTesoureiro() {
+  const user = getUsuario();
+  return user?.tipo === "tesoureiro";
+}
+
+export function isSecretario() {
+  const user = getUsuario();
+  return user?.tipo === "secretario";
+}
+
+export function isLider() {
+  const user = getUsuario();
+  return user?.tipo === "lider";
+}
+
+// 🔥 TOKEN
 export function getToken() {
   return localStorage.getItem("token");
 }
 
-// 🔥 NOVO → verificar se está logado
+// 🔥 VERIFICAR LOGIN
 export function isAuthenticated() {
   return !!getToken();
 }
 
-// 🔥 NOVO → logout
+// 🔥 LOGOUT
 export function logout() {
   localStorage.clear();
   window.location.href = "/";

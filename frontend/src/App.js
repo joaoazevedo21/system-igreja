@@ -12,7 +12,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 
-// ================= 🔐 FUNÇÃO VALIDAR TOKEN =================
+// ================= 🔐 VALIDAR TOKEN =================
 function tokenValido() {
 
   const token = localStorage.getItem("token");
@@ -22,7 +22,6 @@ function tokenValido() {
   try {
     const payload = JSON.parse(atob(token.split(".")[1]));
 
-    // 🔥 verifica expiração
     if (payload.exp * 1000 < Date.now()) {
       localStorage.clear();
       return false;
@@ -39,14 +38,13 @@ function tokenValido() {
 
 // ================= ROTAS PRIVADAS =================
 function PrivateRoute({ children }) {
-
   return tokenValido()
     ? children
     : <Navigate to="/" />;
 }
 
 
-// ================= ROTAS ADMIN =================
+// ================= ADMIN =================
 function AdminRoute({ children }) {
 
   let user = null;
@@ -62,7 +60,6 @@ function AdminRoute({ children }) {
     user = null;
   }
 
-  // 🔥 valida token + tipo
   if (!tokenValido()) {
     return <Navigate to="/" />;
   }
@@ -70,6 +67,34 @@ function AdminRoute({ children }) {
   return user?.tipo === "admin"
     ? children
     : <Navigate to="/dashboard" />;
+}
+
+
+// 🔥 NOVO → PERMISSÕES DINÂMICAS
+function PermissaoRoute({ children, roles }) {
+
+  let user = null;
+
+  try {
+    const data = localStorage.getItem("usuario");
+
+    if (data && data !== "undefined") {
+      user = JSON.parse(data);
+    }
+
+  } catch {
+    user = null;
+  }
+
+  if (!tokenValido()) {
+    return <Navigate to="/" />;
+  }
+
+  if (!roles.includes(user?.tipo)) {
+    return <Navigate to="/dashboard" />;
+  }
+
+  return children;
 }
 
 
@@ -97,17 +122,19 @@ function App() {
           }
         />
 
-        {/* MEMBROS */}
+        {/* MEMBROS → admin + secretario */}
         <Route
           path="/membros"
           element={
             <PrivateRoute>
-              <Membros />
+              <PermissaoRoute roles={["admin", "secretario"]}>
+                <Membros />
+              </PermissaoRoute>
             </PrivateRoute>
           }
         />
 
-        {/* DEPARTAMENTOS */}
+        {/* DEPARTAMENTOS → admin */}
         <Route
           path="/departamentos"
           element={
@@ -119,7 +146,7 @@ function App() {
           }
         />
 
-        {/* USUÁRIOS */}
+        {/* USUÁRIOS → admin */}
         <Route
           path="/usuarios"
           element={

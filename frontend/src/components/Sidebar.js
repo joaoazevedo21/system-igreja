@@ -6,7 +6,6 @@ function Sidebar() {
   const location = useLocation();
   const [aberto, setAberto] = useState(false);
 
-  // 🔥 pegar usuário com segurança
   let user = null;
 
   try {
@@ -28,7 +27,6 @@ function Sidebar() {
   return (
 
     <>
-      {/* BOTÃO MOBILE */}
       <button onClick={() => setAberto(!aberto)} style={styles.menuBtn}>
         ☰
       </button>
@@ -40,16 +38,19 @@ function Sidebar() {
 
         <h2 style={styles.logo}>⚙ Opções</h2>
 
-        {/* 🔥 TODOS VEEM */}
+        {/* TODOS */}
         <Link to="/dashboard" style={{ ...styles.link, ...ativo("/dashboard") }}>
           🏠 Home
         </Link>
 
-        <Link to="/membros" style={{ ...styles.link, ...ativo("/membros") }}>
-          👥 Membros
-        </Link>
+        {/* ADMIN + SECRETARIO */}
+        {(user?.tipo === "admin" || user?.tipo === "secretario") && (
+          <Link to="/membros" style={{ ...styles.link, ...ativo("/membros") }}>
+            👥 Membros
+          </Link>
+        )}
 
-        {/* 🔥 ADMIN */}
+        {/* ADMIN */}
         {user?.tipo === "admin" && (
           <>
             <Link to="/departamentos" style={{ ...styles.link, ...ativo("/departamentos") }}>
@@ -62,10 +63,19 @@ function Sidebar() {
           </>
         )}
 
-        {/* 🔥 LIDER (opcional - se quiser expandir depois) */}
+        {/* TESOUREIRO */}
+        {user?.tipo === "tesoureiro" && (
+          <>
+            <Link to="/financas" style={styles.link}>
+              💰 Finanças
+            </Link>
+          </>
+        )}
+
+        {/* LIDER */}
         {user?.tipo === "lider" && (
           <>
-            {/* espaço para futuras permissões */}
+            {/* espaço para expansão */}
           </>
         )}
 
