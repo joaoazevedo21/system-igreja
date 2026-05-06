@@ -3,6 +3,12 @@ import api from "../services/api";
 import Layout from "../components/Layout";
 import { toast } from "react-toastify";
 
+// 🔥 NOVO (PDF + EXCEL)
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+
 import {
   Chart as ChartJS,
   BarElement,
@@ -34,7 +40,7 @@ function Dashboard() {
   const [dataInicio, setDataInicio] = useState("");
   const [dataFim, setDataFim] = useState("");
 
-  // 🔥 NOVO: valida token antes de tudo
+  // 🔥 NOVO: valida token
   function tokenValido() {
     const token = localStorage.getItem("token");
 
@@ -56,11 +62,55 @@ function Dashboard() {
     }
   }
 
+  // ================= EXPORTAR PDF =================
+  function exportarPDF() {
+    const doc = new jsPDF();
+
+    doc.text("Relatório de Membros por Departamento", 14, 15);
+
+    const tabela = membrosDepto.map(m => [
+      m.departamento,
+      m.total_membros
+    ]);
+
+    doc.autoTable({
+      head: [["Departamento", "Total de Membros"]],
+      body: tabela,
+      startY: 20
+    });
+
+    doc.save("relatorio-membros.pdf");
+  }
+
+  // ================= EXPORTAR EXCEL =================
+  function exportarExcel() {
+
+    const dadosExcel = membrosDepto.map(m => ({
+      Departamento: m.departamento,
+      "Total de Membros": m.total_membros
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(dadosExcel);
+    const workbook = XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Relatório");
+
+    const buffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array"
+    });
+
+    const blob = new Blob([buffer], {
+      type: "application/octet-stream"
+    });
+
+    saveAs(blob, "relatorio-membros.xlsx");
+  }
+
   async function carregarDados() {
 
     try {
 
-      // 🔥 BLOQUEIA se token inválido
       if (!tokenValido()) {
         window.location.href = "/";
         return;
@@ -88,7 +138,6 @@ function Dashboard() {
 
     } catch (error) {
 
-      // 🔥 NOVO: tratamento inteligente
       if (error.response?.status === 401) {
         localStorage.clear();
         window.location.href = "/";
@@ -178,7 +227,14 @@ function Dashboard() {
 
       <h1>📊 Painel de Controle Inteligente</h1>
 
-      {/* 🔥 TOTAL GERAL */}
+      {/* 🔥 BOTÕES NOVOS */}
+      <div style={{ marginBottom: "15px" }}>
+        <button onClick={exportarPDF}>📄 Exportar PDF</button>
+        <button onClick={exportarExcel} style={{ marginLeft: "10px" }}>
+          📊 Exportar Excel
+        </button>
+      </div>
+
       <div style={styles.totalGeral}>
         👥 Total Geral de Membros: <strong>{dados.total_membros}</strong>
       </div>
