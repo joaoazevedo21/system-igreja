@@ -3,7 +3,7 @@ import api from "../services/api";
 import Layout from "../components/Layout";
 import { toast } from "react-toastify";
 
-// 🔥 NOVO (PDF + EXCEL)
+// 🔥 PDF + EXCEL
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import * as XLSX from "xlsx";
@@ -40,7 +40,7 @@ function Dashboard() {
   const [dataInicio, setDataInicio] = useState("");
   const [dataFim, setDataFim] = useState("");
 
-  // 🔥 NOVO: valida token
+  // 🔐 VALIDA TOKEN
   function tokenValido() {
     const token = localStorage.getItem("token");
 
@@ -62,7 +62,7 @@ function Dashboard() {
     }
   }
 
-  // ================= EXPORTAR PDF =================
+  // ================= PDF =================
   function exportarPDF() {
     const doc = new jsPDF();
 
@@ -82,7 +82,7 @@ function Dashboard() {
     doc.save("relatorio-membros.pdf");
   }
 
-  // ================= EXPORTAR EXCEL =================
+  // ================= EXCEL =================
   function exportarExcel() {
 
     const dadosExcel = membrosDepto.map(m => ({
@@ -227,14 +227,18 @@ function Dashboard() {
 
       <h1>📊 Painel de Controle Inteligente</h1>
 
-      {/* 🔥 BOTÕES NOVOS */}
-      <div style={{ marginBottom: "15px" }}>
-        <button onClick={exportarPDF}>📄 Exportar PDF</button>
-        <button onClick={exportarExcel} style={{ marginLeft: "10px" }}>
+      {/* 🔥 BOTÕES VISÍVEIS */}
+      <div style={styles.botoes}>
+        <button style={styles.btnPDF} onClick={exportarPDF}>
+          📄 Exportar PDF
+        </button>
+
+        <button style={styles.btnExcel} onClick={exportarExcel}>
           📊 Exportar Excel
         </button>
       </div>
 
+      {/* TOTAL */}
       <div style={styles.totalGeral}>
         👥 Total Geral de Membros: <strong>{dados.total_membros}</strong>
       </div>
@@ -285,6 +289,27 @@ function Dashboard() {
 }
 
 const styles = {
+  botoes: {
+    display: "flex",
+    gap: "10px",
+    marginBottom: "15px"
+  },
+  btnPDF: {
+    background: "#e74c3c",
+    color: "#fff",
+    border: "none",
+    padding: "10px 15px",
+    borderRadius: "6px",
+    cursor: "pointer"
+  },
+  btnExcel: {
+    background: "#27ae60",
+    color: "#fff",
+    border: "none",
+    padding: "10px 15px",
+    borderRadius: "6px",
+    cursor: "pointer"
+  },
   totalGeral: {
     background: "#2ecc71",
     color: "#fff",
