@@ -1,7 +1,8 @@
 const express = require("express");
-const router = express.Router(); // 🔥 ISTO ESTAVA FALTANDO
+const router = express.Router();
 
 const pool = require("../config/db");
+
 const verificarToken = require("../autenticar/auth");
 const verificarPermissao = require("../autenticar/permissao");
 
@@ -9,10 +10,16 @@ const verificarPermissao = require("../autenticar/permissao");
 router.post(
     "/cadastrar",
     verificarToken,
-    verificarPermissao(["admin","lider"]),
+    verificarPermissao(["admin","secretario"]),
     async (req, res) => {
 
-        const { nome, email, telefone, endereco, departamento_id } = req.body;
+        const {
+            nome,
+            email,
+            telefone,
+            endereco,
+            departamento_id
+        } = req.body;
 
         try {
 
@@ -26,8 +33,10 @@ router.post(
             res.json(novoMembro.rows[0]);
 
         } catch (error) {
+
             console.error(error);
             res.status(500).send("Erro ao cadastrar membro");
+
         }
     }
 );
@@ -36,7 +45,7 @@ router.post(
 router.get(
     "/",
     verificarToken,
-    verificarPermissao(["admin","lider"]),
+    verificarPermissao(["admin","secretario","lider"]),
     async (req, res) => {
 
         try {
@@ -58,8 +67,10 @@ ORDER BY membros.id ASC`
             res.json(membros.rows);
 
         } catch (error) {
+
             console.error(error);
             res.status(500).send("Erro ao listar membros");
+
         }
     }
 );
@@ -68,11 +79,18 @@ ORDER BY membros.id ASC`
 router.put(
     "/atualizar/:id",
     verificarToken,
-    verificarPermissao(["admin","lider"]),
+    verificarPermissao(["admin","secretario"]),
     async (req, res) => {
 
         const { id } = req.params;
-        const { nome, email, telefone, endereco, departamento_id } = req.body;
+
+        const {
+            nome,
+            email,
+            telefone,
+            endereco,
+            departamento_id
+        } = req.body;
 
         try {
 
@@ -86,8 +104,10 @@ router.put(
             res.json(result.rows[0]);
 
         } catch (error) {
+
             console.error(error);
             res.status(500).send("Erro ao atualizar membro");
+
         }
     }
 );
@@ -103,13 +123,20 @@ router.delete(
 
         try {
 
-            await pool.query("DELETE FROM membros WHERE id=$1", [id]);
+            await pool.query(
+                "DELETE FROM membros WHERE id=$1",
+                [id]
+            );
 
-            res.json({ message: "Membro deletado com sucesso" });
+            res.json({
+                message: "Membro deletado com sucesso"
+            });
 
         } catch (error) {
+
             console.error(error);
             res.status(500).send("Erro ao deletar membro");
+
         }
     }
 );
@@ -118,10 +145,14 @@ router.delete(
 router.get(
     "/pesquisa-avancada",
     verificarToken,
-    verificarPermissao(["admin","lider"]),
+    verificarPermissao(["admin","secretario","lider"]),
     async (req, res) => {
 
-        const { nome, email, departamento } = req.query;
+        const {
+            nome,
+            email,
+            departamento
+        } = req.query;
 
         try {
 
@@ -141,14 +172,20 @@ AND
 AND
 ($3::int IS NULL OR membros.departamento_id = $3)
 ORDER BY membros.id ASC`,
-                [nome || null, email || null, departamento || null]
+                [
+                    nome || null,
+                    email || null,
+                    departamento || null
+                ]
             );
 
             res.json(resultado.rows);
 
         } catch (error) {
+
             console.error(error);
             res.status(500).send("Erro na pesquisa");
+
         }
     }
 );
