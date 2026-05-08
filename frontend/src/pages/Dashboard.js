@@ -40,13 +40,18 @@ function Dashboard() {
   const [dataInicio, setDataInicio] = useState("");
   const [dataFim, setDataFim] = useState("");
 
+  // 🔥 NOVO: pegar usuário
+  const usuario = JSON.parse(localStorage.getItem("usuario"));
+
   // 🔐 VALIDA TOKEN
   function tokenValido() {
+
     const token = localStorage.getItem("token");
 
     if (!token) return false;
 
     try {
+
       const payload = JSON.parse(atob(token.split(".")[1]));
 
       if (payload.exp * 1000 < Date.now()) {
@@ -57,29 +62,59 @@ function Dashboard() {
       return true;
 
     } catch {
+
       localStorage.clear();
       return false;
+
     }
   }
 
   // ================= PDF =================
   function exportarPDF() {
+
     const doc = new jsPDF();
 
-    doc.text("Relatório de Membros por Departamento", 14, 15);
+    // 🔥 CABEÇALHO
+    doc.setFontSize(18);
+    doc.text("IGREJA CENTRAL", 14, 20);
 
+    doc.setFontSize(14);
+    doc.text("Relatório de Membros", 14, 30);
+
+    doc.setFontSize(11);
+
+    const hoje = new Date().toLocaleDateString();
+
+    doc.text(`Data: ${hoje}`, 14, 40);
+
+    doc.text(
+      `Total Geral: ${dados.total_membros} membros`,
+      14,
+      48
+    );
+
+    // 🔥 TABELA
     const tabela = membrosDepto.map(m => [
       m.departamento,
       m.total_membros
     ]);
 
     doc.autoTable({
+      startY: 60,
       head: [["Departamento", "Total de Membros"]],
-      body: tabela,
-      startY: 20
+      body: tabela
     });
 
+    // 🔥 RODAPÉ
+    doc.text(
+      "Gerado automaticamente pelo sistema",
+      14,
+      doc.lastAutoTable.finalY + 15
+    );
+
     doc.save("relatorio-membros.pdf");
+
+    toast.success("PDF exportado com sucesso");
   }
 
   // ================= EXCEL =================
@@ -91,9 +126,14 @@ function Dashboard() {
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(dadosExcel);
+
     const workbook = XLSX.utils.book_new();
 
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Relatório");
+    XLSX.utils.book_append_sheet(
+      workbook,
+      worksheet,
+      "Relatório"
+    );
 
     const buffer = XLSX.write(workbook, {
       bookType: "xlsx",
@@ -105,12 +145,15 @@ function Dashboard() {
     });
 
     saveAs(blob, "relatorio-membros.xlsx");
+
+    toast.success("Excel exportado com sucesso");
   }
 
   async function carregarDados() {
 
     try {
 
+      // 🔥 BLOQUEIA se token inválido
       if (!tokenValido()) {
         window.location.href = "/";
         return;
@@ -119,25 +162,30 @@ function Dashboard() {
       const res = await api.get("/estatisticas");
       setDados(res.data);
 
-      const membros = await api.get("/relatorios/membros-por-departamento");
-      setMembrosDepto(membros.data);
+      // 🔥 ADMIN
+      if (usuario?.tipo === "admin") {
 
-      const dizimos = await api.get("/relatorios/dizimos-por-departamento");
-      setDizimosDepto(dizimos.data);
+        const membros = await api.get("/relatorios/membros-por-departamento");
+        setMembrosDepto(membros.data);
 
-      const cres = await api.get("/relatorios/crescimento-mensal");
-      setCrescimento(cres.data);
+        const dizimos = await api.get("/relatorios/dizimos-por-departamento");
+        setDizimosDepto(dizimos.data);
 
-      const status = await api.get("/relatorios/membros-status");
-      setStatusMembros(status.data);
+        const cres = await api.get("/relatorios/crescimento-mensal");
+        setCrescimento(cres.data);
 
-      const rank = await api.get("/relatorios/ranking-departamentos");
-      setRanking(rank.data);
+        const status = await api.get("/relatorios/membros-status");
+        setStatusMembros(status.data);
+
+        const rank = await api.get("/relatorios/ranking-departamentos");
+        setRanking(rank.data);
+      }
 
       toast.success("Dashboard carregado com sucesso");
 
     } catch (error) {
 
+      // 🔥 NOVO: tratamento inteligente
       if (error.response?.status === 401) {
         localStorage.clear();
         window.location.href = "/";
@@ -153,6 +201,7 @@ function Dashboard() {
   }, []);
 
   async function filtrarDizimos() {
+
     try {
 
       if (!tokenValido()) {
@@ -165,6 +214,7 @@ function Dashboard() {
       );
 
       setDizimosDepto(res.data);
+
       toast.info("Filtro aplicado");
 
     } catch (error) {
@@ -223,77 +273,117 @@ function Dashboard() {
   };
 
   return (
+
     <Layout>
 
       <h1>📊 Painel de Controle Inteligente</h1>
 
-      {/* 🔥 BOTÕES VISÍVEIS */}
-      <div style={styles.botoes}>
-        <button style={styles.btnPDF} onClick={exportarPDF}>
-          📄 Exportar PDF
-        </button>
+      {/* 🔥 BOTÕES SOMENTE ADMIN */}
+      {usuario?.tipo === "admin" && (
+        <div style={styles.botoes}>
 
-        <button style={styles.btnExcel} onClick={exportarExcel}>
-          📊 Exportar Excel
-        </button>
-      </div>
+          <button
+            style={styles.btnPDF}
+            onClick={exportarPDF}
+          >
+            📄 Exportar PDF
+          </button>
 
-      {/* TOTAL */}
+          <button
+            style={styles.btnExcel}
+            onClick={exportarExcel}
+          >
+            📊 Exportar Excel
+          </button>
+
+        </div>
+      )}
+
+      {/* 🔥 TOTAL GERAL */}
       <div style={styles.totalGeral}>
-        👥 Total Geral de Membros: <strong>{dados.total_membros}</strong>
+        👥 Total Geral de Membros:
+        <strong> {dados.total_membros}</strong>
       </div>
 
       <div style={styles.cards}>
-        <div style={styles.cardGreen}>👥 {dados.total_membros}</div>
-        <div style={styles.cardBlue}>📁 {dados.total_departamentos}</div>
-        <div style={styles.cardYellow}>💰 {dados.total_dizimos} Kz</div>
-      </div>
 
-      <div style={styles.filtro}>
-        <input type="date" onChange={(e) => setDataInicio(e.target.value)} />
-        <input type="date" onChange={(e) => setDataFim(e.target.value)} />
-        <button onClick={filtrarDizimos}>Filtrar</button>
-      </div>
-
-      <div style={styles.grid}>
-
-        <div style={styles.box}>
-          <h3>Membros por Departamento</h3>
-          <Bar data={dataMembros} />
+        <div style={styles.cardGreen}>
+          👥 {dados.total_membros}
         </div>
 
-        <div style={styles.box}>
-          <h3>Dízimos por Departamento</h3>
-          <Bar data={dataDizimos} />
+        <div style={styles.cardBlue}>
+          📁 {dados.total_departamentos}
         </div>
 
-        <div style={styles.box}>
-          <h3>Crescimento Mensal</h3>
-          <Bar data={dataCrescimento} />
-        </div>
-
-        <div style={styles.box}>
-          <h3>Ativos vs Inativos</h3>
-          <Bar data={dataStatus} />
-        </div>
-
-        <div style={styles.box}>
-          <h3>Top Departamentos</h3>
-          <Bar data={dataRanking} />
+        <div style={styles.cardYellow}>
+          💰 {dados.total_dizimos} Kz
         </div>
 
       </div>
+
+      {/* 🔥 SOMENTE ADMIN */}
+      {usuario?.tipo === "admin" && (
+        <>
+          <div style={styles.filtro}>
+            <input
+              type="date"
+              onChange={(e) => setDataInicio(e.target.value)}
+            />
+
+            <input
+              type="date"
+              onChange={(e) => setDataFim(e.target.value)}
+            />
+
+            <button onClick={filtrarDizimos}>
+              Filtrar
+            </button>
+          </div>
+
+          <div style={styles.grid}>
+
+            <div style={styles.box}>
+              <h3>Membros por Departamento</h3>
+              <Bar data={dataMembros} />
+            </div>
+
+            <div style={styles.box}>
+              <h3>Dízimos por Departamento</h3>
+              <Bar data={dataDizimos} />
+            </div>
+
+            <div style={styles.box}>
+              <h3>Crescimento Mensal</h3>
+              <Bar data={dataCrescimento} />
+            </div>
+
+            <div style={styles.box}>
+              <h3>Ativos vs Inativos</h3>
+              <Bar data={dataStatus} />
+            </div>
+
+            <div style={styles.box}>
+              <h3>Top Departamentos</h3>
+              <Bar data={dataRanking} />
+            </div>
+
+          </div>
+        </>
+      )}
 
     </Layout>
+
   );
 }
 
 const styles = {
+
   botoes: {
     display: "flex",
     gap: "10px",
     marginBottom: "15px"
   },
+
   btnPDF: {
     background: "#e74c3c",
     color: "#fff",
@@ -302,6 +392,7 @@ const styles = {
     borderRadius: "6px",
     cursor: "pointer"
   },
+
   btnExcel: {
     background: "#27ae60",
     color: "#fff",
@@ -310,6 +401,7 @@ const styles = {
     borderRadius: "6px",
     cursor: "pointer"
   },
+
   totalGeral: {
     background: "#2ecc71",
     color: "#fff",
@@ -319,17 +411,55 @@ const styles = {
     textAlign: "center",
     fontWeight: "bold"
   },
+
   cards: {
     display: "flex",
     gap: "15px",
     marginBottom: "20px"
   },
-  cardGreen: { flex: 1, background: "#27ae60", color: "#fff", padding: "20px", borderRadius: "10px" },
-  cardBlue: { flex: 1, background: "#2980b9", color: "#fff", padding: "20px", borderRadius: "10px" },
-  cardYellow: { flex: 1, background: "#f39c12", color: "#fff", padding: "20px", borderRadius: "10px" },
-  filtro: { display: "flex", gap: "10px", marginBottom: "20px" },
-  grid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" },
-  box: { background: "#fff", padding: "20px", borderRadius: "10px" }
+
+  cardGreen: {
+    flex: 1,
+    background: "#27ae60",
+    color: "#fff",
+    padding: "20px",
+    borderRadius: "10px"
+  },
+
+  cardBlue: {
+    flex: 1,
+    background: "#2980b9",
+    color: "#fff",
+    padding: "20px",
+    borderRadius: "10px"
+  },
+
+  cardYellow: {
+    flex: 1,
+    background: "#f39c12",
+    color: "#fff",
+    padding: "20px",
+    borderRadius: "10px"
+  },
+
+  filtro: {
+    display: "flex",
+    gap: "10px",
+    marginBottom: "20px"
+  },
+
+  grid: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: "20px"
+  },
+
+  box: {
+    background: "#fff",
+    padding: "20px",
+    borderRadius: "10px"
+  }
+
 };
 
 export default Dashboard;
