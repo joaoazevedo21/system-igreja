@@ -14,8 +14,11 @@ function Usuarios() {
 
   // ================= CADASTRAR =================
   async function cadastrar(e) {
+
     e.preventDefault();
+
     setLoading(true);
+    setMensagem("");
 
     try {
 
@@ -28,6 +31,7 @@ function Usuarios() {
 
       setMensagem("✅ Usuário criado com sucesso!");
 
+      // 🔥 LIMPAR CAMPOS
       setNome("");
       setEmail("");
       setSenha("");
@@ -36,11 +40,19 @@ function Usuarios() {
     } catch (error) {
 
       console.error(error);
-      setMensagem("❌ Erro ao criar usuário");
+
+      // 🔥 TRATAMENTO MELHORADO
+      if (error.response?.data) {
+        setMensagem(`❌ ${error.response.data}`);
+      } else {
+        setMensagem("❌ Erro ao criar usuário");
+      }
+
+    } finally {
+
+      setLoading(false);
 
     }
-
-    setLoading(false);
   }
 
   return (
@@ -49,10 +61,17 @@ function Usuarios() {
 
       <div style={styles.container}>
 
-        <h1 style={styles.title}>👤 Gestão de Usuários</h1>
+        {/* 🔥 TESTE VISUAL */}
+        <h1 style={styles.title}>
+          🔥 Gestão de Usuários Atualizada
+        </h1>
 
         {/* 🔥 MENSAGEM */}
-        {mensagem && <p style={styles.mensagem}>{mensagem}</p>}
+        {mensagem && (
+          <p style={styles.mensagem}>
+            {mensagem}
+          </p>
+        )}
 
         {/* 🔥 FORM */}
         <form onSubmit={cadastrar} style={styles.form}>
@@ -84,14 +103,16 @@ function Usuarios() {
             required
           />
 
+          {/* 🔥 SELECT ATUALIZADO */}
           <select
             value={tipo}
             onChange={(e) => setTipo(e.target.value)}
             style={styles.input}
           >
 
-            {/* 🔥 NOVAS PERMISSÕES */}
-            <option value="admin">Admin</option>
+            <option value="admin">
+              Admin
+            </option>
 
             <option value="lider">
               Líder
@@ -111,8 +132,16 @@ function Usuarios() {
 
           </select>
 
-          <button style={styles.button} disabled={loading}>
-            {loading ? "Salvando..." : "Criar Usuário"}
+          <button
+            type="submit"
+            style={styles.button}
+            disabled={loading}
+          >
+
+            {loading
+              ? "Salvando..."
+              : "Criar Usuário"}
+
           </button>
 
         </form>
@@ -132,13 +161,15 @@ const styles = {
   },
 
   title: {
-    marginBottom: "10px",
-    color: "#2c3e50"
+    marginBottom: "15px",
+    color: "#2c3e50",
+    fontSize: "28px"
   },
 
   mensagem: {
     marginBottom: "15px",
-    fontWeight: "bold"
+    fontWeight: "bold",
+    color: "#2c3e50"
   },
 
   form: {
@@ -155,7 +186,8 @@ const styles = {
   input: {
     padding: "10px",
     borderRadius: "8px",
-    border: "1px solid #ccc"
+    border: "1px solid #ccc",
+    outline: "none"
   },
 
   button: {
