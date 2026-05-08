@@ -1,26 +1,32 @@
 const express = require("express");
 const router = express.Router();
 const pool = require("../config/db");
+
 const verificarToken = require("../autenticar/auth");
+const verificarPermissao = require("../autenticar/permissao");
 
-router.get("/", verificarToken, async (req, res) => {
+router.get(
+    "/",
+    verificarToken,
+    verificarPermissao(["admin", "lider", "secretario"]),
+    async (req, res) => {
 
- try{
+        try {
 
-  const departamentos = await pool.query(
-   "SELECT * FROM departamentos ORDER BY id ASC"
-  );
+            const departamentos = await pool.query(
+                "SELECT * FROM departamentos ORDER BY id ASC"
+            );
 
-  res.json(departamentos.rows);
+            res.json(departamentos.rows);
 
- }catch(error){
+        } catch (error) {
 
-  console.error(error);
-  res.status(500).send("Erro ao buscar departamentos");
+            console.error(error);
+            res.status(500).send("Erro ao buscar departamentos");
 
- }
+        }
 
-});
-
+    }
+);
 
 module.exports = router;
