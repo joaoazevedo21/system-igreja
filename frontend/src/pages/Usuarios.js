@@ -89,9 +89,26 @@ function Usuarios() {
             onChange={(e) => setTipo(e.target.value)}
             style={styles.input}
           >
+
+            {/* 🔥 NOVAS PERMISSÕES */}
             <option value="admin">Admin</option>
-            <option value="lider">Líder</option>
-            <option value="comum">Comum</option>
+
+            <option value="lider">
+              Líder
+            </option>
+
+            <option value="secretario">
+              Secretário
+            </option>
+
+            <option value="tesoureiro">
+              Tesoureiro
+            </option>
+
+            <option value="comum">
+              Comum
+            </option>
+
           </select>
 
           <button style={styles.button} disabled={loading}>
