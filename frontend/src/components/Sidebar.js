@@ -9,6 +9,7 @@ function Sidebar() {
   let user = null;
 
   try {
+
     const usuarioString = localStorage.getItem("usuario");
 
     if (usuarioString && usuarioString !== "undefined") {
@@ -16,8 +17,10 @@ function Sidebar() {
     }
 
   } catch (error) {
+
     console.error("Erro ao ler usuário:", error);
     user = null;
+
   }
 
   function ativo(path) {
@@ -38,44 +41,121 @@ function Sidebar() {
 
         <h2 style={styles.logo}>⚙ Opções</h2>
 
-        {/* TODOS */}
-        <Link to="/dashboard" style={{ ...styles.link, ...ativo("/dashboard") }}>
+        {/* 🔥 TODOS */}
+        <Link
+          to="/dashboard"
+          style={{ ...styles.link, ...ativo("/dashboard") }}
+        >
           🏠 Home
         </Link>
 
-        {/* ADMIN + SECRETARIO */}
+        {/* 🔥 ADMIN + SECRETARIO */}
         {(user?.tipo === "admin" || user?.tipo === "secretario") && (
-          <Link to="/membros" style={{ ...styles.link, ...ativo("/membros") }}>
-            👥 Membros
-          </Link>
+          <>
+            <Link
+              to="/membros"
+              style={{ ...styles.link, ...ativo("/membros") }}
+            >
+              👥 Membros
+            </Link>
+          </>
         )}
 
-        {/* ADMIN */}
+        {/* 🔥 ADMIN */}
         {user?.tipo === "admin" && (
           <>
-            <Link to="/departamentos" style={{ ...styles.link, ...ativo("/departamentos") }}>
+
+            <Link
+              to="/departamentos"
+              style={{ ...styles.link, ...ativo("/departamentos") }}
+            >
               📁 Departamentos
             </Link>
 
-            <Link to="/usuarios" style={{ ...styles.link, ...ativo("/usuarios") }}>
+            <Link
+              to="/usuarios"
+              style={{ ...styles.link, ...ativo("/usuarios") }}
+            >
               👤 Usuários
             </Link>
-          </>
-        )}
 
-        {/* TESOUREIRO */}
-        {user?.tipo === "tesoureiro" && (
-          <>
-            <Link to="/financas" style={styles.link}>
+            <Link
+              to="/financas"
+              style={{ ...styles.link, ...ativo("/financas") }}
+            >
               💰 Finanças
             </Link>
+
+            <Link
+              to="/dizimos"
+              style={{ ...styles.link, ...ativo("/dizimos") }}
+            >
+              💵 Dízimos
+            </Link>
+
+            <Link
+              to="/ofertas"
+              style={{ ...styles.link, ...ativo("/ofertas") }}
+            >
+              🎁 Ofertas
+            </Link>
+
+            <Link
+              to="/eventos"
+              style={{ ...styles.link, ...ativo("/eventos") }}
+            >
+              📅 Eventos
+            </Link>
+
+            <Link
+              to="/avisos"
+              style={{ ...styles.link, ...ativo("/avisos") }}
+            >
+              📢 Avisos
+            </Link>
+
           </>
         )}
 
-        {/* LIDER */}
+        {/* 🔥 TESOUREIRO */}
+        {user?.tipo === "tesoureiro" && (
+          <>
+
+            <Link
+              to="/financas"
+              style={{ ...styles.link, ...ativo("/financas") }}
+            >
+              💰 Finanças
+            </Link>
+
+            <Link
+              to="/dizimos"
+              style={{ ...styles.link, ...ativo("/dizimos") }}
+            >
+              💵 Dízimos
+            </Link>
+
+            <Link
+              to="/ofertas"
+              style={{ ...styles.link, ...ativo("/ofertas") }}
+            >
+              🎁 Ofertas
+            </Link>
+
+          </>
+        )}
+
+        {/* 🔥 LIDER */}
         {user?.tipo === "lider" && (
           <>
-            {/* espaço para expansão */}
+
+            <Link
+              to="/dashboard"
+              style={{ ...styles.link, ...ativo("/dashboard") }}
+            >
+              📊 Painel
+            </Link>
+
           </>
         )}
 
