@@ -1,14 +1,25 @@
 const express = require("express");
 const router = express.Router();
+
 const pool = require("../config/db");
+
 const verificarToken = require("../autenticar/auth");
 const verificarPermissao = require("../autenticar/permissao");
 
 // 🔥 CORS LOCAL
 router.use((req, res, next) => {
+
     res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+    res.header(
+        "Access-Control-Allow-Methods",
+        "GET, POST, PUT, DELETE, OPTIONS"
+    );
+
+    res.header(
+        "Access-Control-Allow-Headers",
+        "Content-Type, Authorization"
+    );
 
     if (req.method === "OPTIONS") {
         return res.sendStatus(200);
@@ -17,9 +28,12 @@ router.use((req, res, next) => {
     next();
 });
 
-
 // ================== DÍZIMOS POR DEPARTAMENTO ==================
-router.get("/dizimos-por-departamento", verificarToken, verificarPermissao(["admin"]), async (req, res) => {
+router.get(
+"/dizimos-por-departamento",
+verificarToken,
+verificarPermissao(["admin","tesoureiro"]),
+async (req, res) => {
 
     const { inicio, fim } = req.query;
 
@@ -46,18 +60,26 @@ router.get("/dizimos-por-departamento", verificarToken, verificarPermissao(["adm
         `;
 
         const resultado = await pool.query(query, params);
+
         res.json(resultado.rows);
 
     } catch (error) {
+
         console.error(error);
         res.status(500).send("Erro ao gerar relatório de dízimos");
+
     }
 });
 
-
 // ================== TOTAL DÍZIMOS ==================
-router.get("/total-dizimos", verificarToken, verificarPermissao(["admin"]), async (req, res) => {
+router.get(
+"/total-dizimos",
+verificarToken,
+verificarPermissao(["admin","tesoureiro"]),
+async (req, res) => {
+
     try {
+
         const resultado = await pool.query(
             "SELECT COALESCE(SUM(valor),0) AS total_geral FROM dizimos"
         );
@@ -65,14 +87,20 @@ router.get("/total-dizimos", verificarToken, verificarPermissao(["admin"]), asyn
         res.json(resultado.rows[0]);
 
     } catch (error) {
+
         console.error(error);
         res.status(500).send("Erro total dízimos");
+
     }
 });
 
-
 // ================== MEMBROS POR DEPARTAMENTO ==================
-router.get("/membros-por-departamento", verificarToken, verificarPermissao(["admin"]), async (req, res) => {
+router.get(
+"/membros-por-departamento",
+verificarToken,
+verificarPermissao(["admin","secretario","lider"]),
+async (req, res) => {
+
     try {
 
         const resultado = await pool.query(`
@@ -88,14 +116,20 @@ router.get("/membros-por-departamento", verificarToken, verificarPermissao(["adm
         res.json(resultado.rows);
 
     } catch (error) {
+
         console.error(error);
         res.status(500).send("Erro membros por departamento");
+
     }
 });
 
-
 // ================== CRESCIMENTO MENSAL ==================
-router.get("/crescimento-mensal", verificarToken, async (req, res) => {
+router.get(
+"/crescimento-mensal",
+verificarToken,
+verificarPermissao(["admin","secretario","lider"]),
+async (req, res) => {
+
     try {
 
         const result = await pool.query(`
@@ -110,14 +144,20 @@ router.get("/crescimento-mensal", verificarToken, async (req, res) => {
         res.json(result.rows);
 
     } catch (error) {
+
         console.error(error);
         res.status(500).send("Erro crescimento mensal");
+
     }
 });
 
-
 // ================== ATIVOS VS INATIVOS ==================
-router.get("/membros-status", verificarToken, async (req, res) => {
+router.get(
+"/membros-status",
+verificarToken,
+verificarPermissao(["admin","secretario","lider"]),
+async (req, res) => {
+
     try {
 
         const ativos = await pool.query(
@@ -134,14 +174,20 @@ router.get("/membros-status", verificarToken, async (req, res) => {
         });
 
     } catch (error) {
+
         console.error(error);
         res.status(500).send("Erro status membros");
+
     }
 });
 
-
 // ================== RANKING ==================
-router.get("/ranking-departamentos", verificarToken, async (req, res) => {
+router.get(
+"/ranking-departamentos",
+verificarToken,
+verificarPermissao(["admin","secretario","lider"]),
+async (req, res) => {
+
     try {
 
         const result = await pool.query(`
@@ -158,8 +204,10 @@ router.get("/ranking-departamentos", verificarToken, async (req, res) => {
         res.json(result.rows);
 
     } catch (error) {
+
         console.error(error);
         res.status(500).send("Erro ranking");
+
     }
 });
 
