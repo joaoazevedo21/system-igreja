@@ -49,21 +49,18 @@ function Sidebar() {
           🏠 Home
         </Link>
 
-        {/* 🔥 ADMIN + SECRETARIO */}
-        {(user?.tipo === "admin" || user?.tipo === "secretario") && (
+        {/* ================================================= */}
+        {/* 🔥 ADMIN */}
+        {/* ================================================= */}
+        {user?.tipo === "admin" && (
           <>
+
             <Link
               to="/membros"
               style={{ ...styles.link, ...ativo("/membros") }}
             >
               👥 Membros
             </Link>
-          </>
-        )}
-
-        {/* 🔥 ADMIN */}
-        {user?.tipo === "admin" && (
-          <>
 
             <Link
               to="/departamentos"
@@ -114,10 +111,56 @@ function Sidebar() {
               📢 Avisos
             </Link>
 
+            <Link
+              to="/relatorios"
+              style={{ ...styles.link, ...ativo("/relatorios") }}
+            >
+              📊 Relatórios
+            </Link>
+
           </>
         )}
 
+        {/* ================================================= */}
+        {/* 🔥 SECRETARIO */}
+        {/* ================================================= */}
+        {user?.tipo === "secretario" && (
+          <>
+
+            <Link
+              to="/membros"
+              style={{ ...styles.link, ...ativo("/membros") }}
+            >
+              👥 Membros
+            </Link>
+
+            <Link
+              to="/eventos"
+              style={{ ...styles.link, ...ativo("/eventos") }}
+            >
+              📅 Eventos
+            </Link>
+
+            <Link
+              to="/avisos"
+              style={{ ...styles.link, ...ativo("/avisos") }}
+            >
+              📢 Avisos
+            </Link>
+
+            <Link
+              to="/relatorios"
+              style={{ ...styles.link, ...ativo("/relatorios") }}
+            >
+              📊 Relatórios
+            </Link>
+
+          </>
+        )}
+
+        {/* ================================================= */}
         {/* 🔥 TESOUREIRO */}
+        {/* ================================================= */}
         {user?.tipo === "tesoureiro" && (
           <>
 
@@ -142,11 +185,43 @@ function Sidebar() {
               🎁 Ofertas
             </Link>
 
+            <Link
+              to="/relatorios"
+              style={{ ...styles.link, ...ativo("/relatorios") }}
+            >
+              📊 Relatórios
+            </Link>
+
           </>
         )}
 
+        {/* ================================================= */}
         {/* 🔥 LIDER */}
+        {/* ================================================= */}
         {user?.tipo === "lider" && (
+          <>
+
+            <Link
+              to="/membros"
+              style={{ ...styles.link, ...ativo("/membros") }}
+            >
+              👥 Membros
+            </Link>
+
+            <Link
+              to="/dashboard"
+              style={{ ...styles.link, ...ativo("/dashboard") }}
+            >
+              📊 Painel
+            </Link>
+
+          </>
+        )}
+
+        {/* ================================================= */}
+        {/* 🔥 USUÁRIO COMUM */}
+        {/* ================================================= */}
+        {user?.tipo === "comum" && (
           <>
 
             <Link
@@ -181,14 +256,15 @@ const styles = {
   },
 
   sidebar: {
-    width: "180px",
+    width: "220px",
     height: "100vh",
     background: "#1e272e",
     color: "#fff",
     padding: "20px",
     position: "fixed",
     top: 0,
-    transition: "0.3s"
+    transition: "0.3s",
+    overflowY: "auto"
   },
 
   logo: {
