@@ -7,6 +7,10 @@ import Membros from "./pages/Membros";
 import Departamentos from "./pages/Departamentos";
 import Usuarios from "./pages/Usuarios";
 
+// 🔥 NOVAS PÁGINAS
+import Dizimos from "./pages/Dizimos";
+import Financeiro from "./pages/Financeiro";
+
 // 🔥 TOAST
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -20,8 +24,10 @@ function tokenValido() {
   if (!token) return false;
 
   try {
+
     const payload = JSON.parse(atob(token.split(".")[1]));
 
+    // 🔥 VERIFICA EXPIRAÇÃO
     if (payload.exp * 1000 < Date.now()) {
       localStorage.clear();
       return false;
@@ -30,35 +36,49 @@ function tokenValido() {
     return true;
 
   } catch (error) {
+
     localStorage.clear();
     return false;
+
+  }
+}
+
+
+// ================= PEGAR USUÁRIO =================
+function getUsuario() {
+
+  try {
+
+    const data = localStorage.getItem("usuario");
+
+    if (data && data !== "undefined") {
+      return JSON.parse(data);
+    }
+
+    return null;
+
+  } catch {
+
+    return null;
+
   }
 }
 
 
 // ================= ROTAS PRIVADAS =================
 function PrivateRoute({ children }) {
+
   return tokenValido()
     ? children
     : <Navigate to="/" />;
+
 }
 
 
 // ================= ADMIN =================
 function AdminRoute({ children }) {
 
-  let user = null;
-
-  try {
-    const data = localStorage.getItem("usuario");
-
-    if (data && data !== "undefined") {
-      user = JSON.parse(data);
-    }
-
-  } catch {
-    user = null;
-  }
+  const user = getUsuario();
 
   if (!tokenValido()) {
     return <Navigate to="/" />;
@@ -67,29 +87,20 @@ function AdminRoute({ children }) {
   return user?.tipo === "admin"
     ? children
     : <Navigate to="/dashboard" />;
+
 }
 
 
-// 🔥 NOVO → PERMISSÕES DINÂMICAS
+// ================= 🔥 PERMISSÕES DINÂMICAS =================
 function PermissaoRoute({ children, roles }) {
 
-  let user = null;
-
-  try {
-    const data = localStorage.getItem("usuario");
-
-    if (data && data !== "undefined") {
-      user = JSON.parse(data);
-    }
-
-  } catch {
-    user = null;
-  }
+  const user = getUsuario();
 
   if (!tokenValido()) {
     return <Navigate to="/" />;
   }
 
+  // 🔥 SEM PERMISSÃO
   if (!roles.includes(user?.tipo)) {
     return <Navigate to="/dashboard" />;
   }
@@ -105,6 +116,7 @@ function App() {
 
     <BrowserRouter>
 
+      {/* 🔥 TOAST */}
       <ToastContainer />
 
       <Routes>
@@ -122,19 +134,59 @@ function App() {
           }
         />
 
-        {/* MEMBROS → admin + secretario */}
+        {/* MEMBROS */}
         <Route
           path="/membros"
           element={
             <PrivateRoute>
-              <PermissaoRoute roles={["admin", "secretario"]}>
+              <PermissaoRoute
+                roles={[
+                  "admin",
+                  "secretario",
+                  "lider"
+                ]}
+              >
                 <Membros />
               </PermissaoRoute>
             </PrivateRoute>
           }
         />
 
-        {/* DEPARTAMENTOS → admin */}
+        {/* DÍZIMOS */}
+        <Route
+          path="/dizimos"
+          element={
+            <PrivateRoute>
+              <PermissaoRoute
+                roles={[
+                  "admin",
+                  "tesoureiro"
+                ]}
+              >
+                <Dizimos />
+              </PermissaoRoute>
+            </PrivateRoute>
+          }
+        />
+
+        {/* FINANCEIRO */}
+        <Route
+          path="/financeiro"
+          element={
+            <PrivateRoute>
+              <PermissaoRoute
+                roles={[
+                  "admin",
+                  "tesoureiro"
+                ]}
+              >
+                <Financeiro />
+              </PermissaoRoute>
+            </PrivateRoute>
+          }
+        />
+
+        {/* DEPARTAMENTOS */}
         <Route
           path="/departamentos"
           element={
@@ -146,7 +198,7 @@ function App() {
           }
         />
 
-        {/* USUÁRIOS → admin */}
+        {/* USUÁRIOS */}
         <Route
           path="/usuarios"
           element={
@@ -158,8 +210,31 @@ function App() {
           }
         />
 
+        {/* 🔥 USUÁRIO COMUM */}
+        <Route
+          path="/perfil"
+          element={
+            <PrivateRoute>
+              <PermissaoRoute
+                roles={[
+                  "comum",
+                  "admin",
+                  "lider",
+                  "secretario",
+                  "tesoureiro"
+                ]}
+              >
+                <Dashboard />
+              </PermissaoRoute>
+            </PrivateRoute>
+          }
+        />
+
         {/* 🔥 ROTA INVÁLIDA */}
-        <Route path="*" element={<Navigate to="/dashboard" />} />
+        <Route
+          path="*"
+          element={<Navigate to="/dashboard" />}
+        />
 
       </Routes>
 
