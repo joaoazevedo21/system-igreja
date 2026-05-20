@@ -7,6 +7,8 @@ function Usuarios() {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+
+  // 🔥 PADRÃO
   const [tipo, setTipo] = useState("lider");
 
   const [loading, setLoading] = useState(false);
@@ -35,13 +37,14 @@ function Usuarios() {
       setNome("");
       setEmail("");
       setSenha("");
+
+      // 🔥 RESET
       setTipo("lider");
 
     } catch (error) {
 
       console.error(error);
 
-      // 🔥 TRATAMENTO MELHORADO
       if (error.response?.data) {
         setMensagem(`❌ ${error.response.data}`);
       } else {
@@ -61,9 +64,8 @@ function Usuarios() {
 
       <div style={styles.container}>
 
-        {/* 🔥 TESTE VISUAL */}
         <h1 style={styles.title}>
-          🔥 Gestão de Usuários Atualizada
+          👤 Gestão de Usuários
         </h1>
 
         {/* 🔥 MENSAGEM */}
@@ -103,7 +105,7 @@ function Usuarios() {
             required
           />
 
-          {/* 🔥 SELECT ATUALIZADO */}
+          {/* 🔥 SELECT COMPLETO */}
           <select
             value={tipo}
             onChange={(e) => setTipo(e.target.value)}
@@ -127,7 +129,7 @@ function Usuarios() {
             </option>
 
             <option value="comum">
-              Comum
+              Usuário Comum
             </option>
 
           </select>
