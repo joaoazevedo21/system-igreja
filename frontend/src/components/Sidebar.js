@@ -76,9 +76,10 @@ function Sidebar() {
               👤 Usuários
             </Link>
 
+            {/* 🔥 ALTERADO */}
             <Link
-              to="/financas"
-              style={{ ...styles.link, ...ativo("/financas") }}
+              to="/financeiro"
+              style={{ ...styles.link, ...ativo("/financeiro") }}
             >
               💰 Finanças
             </Link>
@@ -164,9 +165,10 @@ function Sidebar() {
         {user?.tipo === "tesoureiro" && (
           <>
 
+            {/* 🔥 ALTERADO */}
             <Link
-              to="/financas"
-              style={{ ...styles.link, ...ativo("/financas") }}
+              to="/financeiro"
+              style={{ ...styles.link, ...ativo("/financeiro") }}
             >
               💰 Finanças
             </Link>

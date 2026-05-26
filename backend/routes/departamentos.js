@@ -8,7 +8,12 @@ const verificarPermissao = require("../autenticar/permissao");
 router.get(
     "/",
     verificarToken,
-    verificarPermissao(["admin", "lider", "secretario"]),
+    verificarPermissao([
+        "admin",
+        "lider",
+        "secretario",
+        "tesoureiro"
+    ]),
     async (req, res) => {
 
         try {
