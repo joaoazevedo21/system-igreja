@@ -196,8 +196,12 @@ function Dashboard() {
     }
   }
 
-  useEffect(() => {
+    useEffect(() => {
+
     carregarDados();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, []);
 
   async function filtrarDizimos() {
