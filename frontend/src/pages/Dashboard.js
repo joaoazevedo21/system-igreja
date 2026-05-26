@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import api from "../services/api";
 import Layout from "../components/Layout";
 import { toast } from "react-toastify";
@@ -20,7 +20,13 @@ import {
 
 import { Bar } from "react-chartjs-2";
 
-ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
+ChartJS.register(
+  BarElement,
+  CategoryScale,
+  LinearScale,
+  Tooltip,
+  Legend
+);
 
 function Dashboard() {
 
@@ -34,16 +40,22 @@ function Dashboard() {
   const [dizimosDepto, setDizimosDepto] = useState([]);
 
   const [crescimento, setCrescimento] = useState([]);
-  const [statusMembros, setStatusMembros] = useState({ ativos: 0, inativos: 0 });
+  const [statusMembros, setStatusMembros] = useState({
+    ativos: 0,
+    inativos: 0
+  });
+
   const [ranking, setRanking] = useState([]);
 
   const [dataInicio, setDataInicio] = useState("");
   const [dataFim, setDataFim] = useState("");
 
-  // 🔥 NOVO: pegar usuário
-  const usuario = JSON.parse(localStorage.getItem("usuario"));
+  // 🔥 PEGAR USUÁRIO
+  const usuario = JSON.parse(
+    localStorage.getItem("usuario")
+  );
 
-  // 🔐 VALIDA TOKEN
+  // 🔐 VALIDAR TOKEN
   function tokenValido() {
 
     const token = localStorage.getItem("token");
@@ -52,11 +64,15 @@ function Dashboard() {
 
     try {
 
-      const payload = JSON.parse(atob(token.split(".")[1]));
+      const payload = JSON.parse(
+        atob(token.split(".")[1])
+      );
 
       if (payload.exp * 1000 < Date.now()) {
+
         localStorage.clear();
         return false;
+
       }
 
       return true;
@@ -74,7 +90,6 @@ function Dashboard() {
 
     const doc = new jsPDF();
 
-    // 🔥 CABEÇALHO
     doc.setFontSize(18);
     doc.text("IGREJA CENTRAL", 14, 20);
 
@@ -93,8 +108,7 @@ function Dashboard() {
       48
     );
 
-    // 🔥 TABELA
-    const tabela = membrosDepto.map(m => [
+    const tabela = membrosDepto.map((m) => [
       m.departamento,
       m.total_membros
     ]);
@@ -105,7 +119,6 @@ function Dashboard() {
       body: tabela
     });
 
-    // 🔥 RODAPÉ
     doc.text(
       "Gerado automaticamente pelo sistema",
       14,
@@ -120,12 +133,13 @@ function Dashboard() {
   // ================= EXCEL =================
   function exportarExcel() {
 
-    const dadosExcel = membrosDepto.map(m => ({
+    const dadosExcel = membrosDepto.map((m) => ({
       Departamento: m.departamento,
       "Total de Membros": m.total_membros
     }));
 
-    const worksheet = XLSX.utils.json_to_sheet(dadosExcel);
+    const worksheet =
+      XLSX.utils.json_to_sheet(dadosExcel);
 
     const workbook = XLSX.utils.book_new();
 
@@ -149,68 +163,95 @@ function Dashboard() {
     toast.success("Excel exportado com sucesso");
   }
 
-  async function carregarDados() {
+  // ================= CARREGAR DADOS =================
+  const carregarDados = useCallback(async () => {
 
     try {
 
-      // 🔥 BLOQUEIA se token inválido
       if (!tokenValido()) {
+
         window.location.href = "/";
         return;
+
       }
 
       const res = await api.get("/estatisticas");
+
       setDados(res.data);
 
       // 🔥 ADMIN
       if (usuario?.tipo === "admin") {
 
-        const membros = await api.get("/relatorios/membros-por-departamento");
+        const membros = await api.get(
+          "/relatorios/membros-por-departamento"
+        );
+
         setMembrosDepto(membros.data);
 
-        const dizimos = await api.get("/relatorios/dizimos-por-departamento");
+        const dizimos = await api.get(
+          "/relatorios/dizimos-por-departamento"
+        );
+
         setDizimosDepto(dizimos.data);
 
-        const cres = await api.get("/relatorios/crescimento-mensal");
+        const cres = await api.get(
+          "/relatorios/crescimento-mensal"
+        );
+
         setCrescimento(cres.data);
 
-        const status = await api.get("/relatorios/membros-status");
+        const status = await api.get(
+          "/relatorios/membros-status"
+        );
+
         setStatusMembros(status.data);
 
-        const rank = await api.get("/relatorios/ranking-departamentos");
+        const rank = await api.get(
+          "/relatorios/ranking-departamentos"
+        );
+
         setRanking(rank.data);
       }
 
-      toast.success("Dashboard carregado com sucesso");
+      toast.success(
+        "Dashboard carregado com sucesso"
+      );
 
     } catch (error) {
 
-      // 🔥 NOVO: tratamento inteligente
       if (error.response?.status === 401) {
+
         localStorage.clear();
         window.location.href = "/";
+
       }
 
-      toast.error("Erro ao carregar dashboard");
+      toast.error(
+        "Erro ao carregar dashboard"
+      );
+
       console.error(error);
     }
-  }
 
-    useEffect(() => {
+  }, [usuario?.tipo]);
+
+  // ================= USE EFFECT =================
+  useEffect(() => {
 
     carregarDados();
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [carregarDados]);
 
-  }, []);
-
+  // ================= FILTRAR DÍZIMOS =================
   async function filtrarDizimos() {
 
     try {
 
       if (!tokenValido()) {
+
         window.location.href = "/";
         return;
+
       }
 
       const res = await api.get(
@@ -224,66 +265,115 @@ function Dashboard() {
     } catch (error) {
 
       if (error.response?.status === 401) {
+
         localStorage.clear();
         window.location.href = "/";
+
       }
 
       toast.error("Erro ao filtrar dados");
     }
   }
 
+  // ================= GRÁFICOS =================
   const dataMembros = {
-    labels: membrosDepto.map(d => d.departamento),
-    datasets: [{
-      label: "Membros",
-      data: membrosDepto.map(d => d.total_membros),
-      backgroundColor: "#27ae60"
-    }]
+
+    labels: membrosDepto.map(
+      (d) => d.departamento
+    ),
+
+    datasets: [
+      {
+        label: "Membros",
+        data: membrosDepto.map(
+          (d) => d.total_membros
+        ),
+        backgroundColor: "#27ae60"
+      }
+    ]
   };
 
   const dataDizimos = {
-    labels: dizimosDepto.map(d => d.departamento),
-    datasets: [{
-      label: "Dízimos (Kz)",
-      data: dizimosDepto.map(d => d.total_dizimos),
-      backgroundColor: "#2980b9"
-    }]
+
+    labels: dizimosDepto.map(
+      (d) => d.departamento
+    ),
+
+    datasets: [
+      {
+        label: "Dízimos (Kz)",
+        data: dizimosDepto.map(
+          (d) => d.total_dizimos
+        ),
+        backgroundColor: "#2980b9"
+      }
+    ]
   };
 
   const dataCrescimento = {
-    labels: crescimento.map(c => c.mes),
-    datasets: [{
-      label: "Novos Membros",
-      data: crescimento.map(c => c.total),
-      backgroundColor: "#8e44ad"
-    }]
+
+    labels: crescimento.map(
+      (c) => c.mes
+    ),
+
+    datasets: [
+      {
+        label: "Novos Membros",
+        data: crescimento.map(
+          (c) => c.total
+        ),
+        backgroundColor: "#8e44ad"
+      }
+    ]
   };
 
   const dataStatus = {
+
     labels: ["Ativos", "Inativos"],
-    datasets: [{
-      data: [statusMembros.ativos, statusMembros.inativos],
-      backgroundColor: ["#2ecc71", "#e74c3c"]
-    }]
+
+    datasets: [
+      {
+        data: [
+          statusMembros.ativos,
+          statusMembros.inativos
+        ],
+
+        backgroundColor: [
+          "#2ecc71",
+          "#e74c3c"
+        ]
+      }
+    ]
   };
 
   const dataRanking = {
-    labels: ranking.map(r => r.departamento),
-    datasets: [{
-      label: "Top Departamentos",
-      data: ranking.map(r => r.total),
-      backgroundColor: "#f1c40f"
-    }]
+
+    labels: ranking.map(
+      (r) => r.departamento
+    ),
+
+    datasets: [
+      {
+        label: "Top Departamentos",
+        data: ranking.map(
+          (r) => r.total
+        ),
+        backgroundColor: "#f1c40f"
+      }
+    ]
   };
 
   return (
 
     <Layout>
 
-      <h1>📊 Painel de Controle Inteligente</h1>
+      <h1>
+        📊 Painel de Controle Inteligente
+      </h1>
 
-      {/* 🔥 BOTÕES SOMENTE ADMIN */}
+      {/* 🔥 BOTÕES ADMIN */}
       {usuario?.tipo === "admin" && (
+
         <div style={styles.botoes}>
 
           <button
@@ -303,10 +393,16 @@ function Dashboard() {
         </div>
       )}
 
-      {/* 🔥 TOTAL GERAL */}
+      {/* 🔥 TOTAL */}
       <div style={styles.totalGeral}>
+
         👥 Total Geral de Membros:
-        <strong> {dados.total_membros}</strong>
+
+        <strong>
+          {" "}
+          {dados.total_membros}
+        </strong>
+
       </div>
 
       <div style={styles.cards}>
@@ -325,58 +421,80 @@ function Dashboard() {
 
       </div>
 
-      {/* 🔥 SOMENTE ADMIN */}
+      {/* 🔥 ADMIN */}
       {usuario?.tipo === "admin" && (
         <>
+
           <div style={styles.filtro}>
+
             <input
               type="date"
-              onChange={(e) => setDataInicio(e.target.value)}
+              onChange={(e) =>
+                setDataInicio(e.target.value)
+              }
             />
 
             <input
               type="date"
-              onChange={(e) => setDataFim(e.target.value)}
+              onChange={(e) =>
+                setDataFim(e.target.value)
+              }
             />
 
             <button onClick={filtrarDizimos}>
               Filtrar
             </button>
+
           </div>
 
           <div style={styles.grid}>
 
             <div style={styles.box}>
-              <h3>Membros por Departamento</h3>
+              <h3>
+                Membros por Departamento
+              </h3>
+
               <Bar data={dataMembros} />
             </div>
 
             <div style={styles.box}>
-              <h3>Dízimos por Departamento</h3>
+              <h3>
+                Dízimos por Departamento
+              </h3>
+
               <Bar data={dataDizimos} />
             </div>
 
             <div style={styles.box}>
-              <h3>Crescimento Mensal</h3>
+              <h3>
+                Crescimento Mensal
+              </h3>
+
               <Bar data={dataCrescimento} />
             </div>
 
             <div style={styles.box}>
-              <h3>Ativos vs Inativos</h3>
+              <h3>
+                Ativos vs Inativos
+              </h3>
+
               <Bar data={dataStatus} />
             </div>
 
             <div style={styles.box}>
-              <h3>Top Departamentos</h3>
+              <h3>
+                Top Departamentos
+              </h3>
+
               <Bar data={dataRanking} />
             </div>
 
           </div>
+
         </>
       )}
 
     </Layout>
-
   );
 }
 
