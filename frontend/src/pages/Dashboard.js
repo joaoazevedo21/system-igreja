@@ -38,7 +38,6 @@ function Dashboard() {
 
   const [membrosDepto, setMembrosDepto] = useState([]);
   const [dizimosDepto, setDizimosDepto] = useState([]);
-
   const [crescimento, setCrescimento] = useState([]);
   const [statusMembros, setStatusMembros] = useState({
     ativos: 0,
@@ -50,12 +49,12 @@ function Dashboard() {
   const [dataInicio, setDataInicio] = useState("");
   const [dataFim, setDataFim] = useState("");
 
-  // 🔥 PEGAR USUÁRIO
+  // 🔥 USUÁRIO
   const usuario = JSON.parse(
     localStorage.getItem("usuario")
   );
 
-  // 🔐 VALIDAR TOKEN
+  // ================= VALIDAR TOKEN =================
   function tokenValido() {
 
     const token = localStorage.getItem("token");
@@ -138,8 +137,9 @@ function Dashboard() {
       "Total de Membros": m.total_membros
     }));
 
-    const worksheet =
-      XLSX.utils.json_to_sheet(dadosExcel);
+    const worksheet = XLSX.utils.json_to_sheet(
+      dadosExcel
+    );
 
     const workbook = XLSX.utils.book_new();
 
@@ -168,6 +168,7 @@ function Dashboard() {
 
     try {
 
+      // 🔥 BLOQUEIA TOKEN INVÁLIDO
       if (!tokenValido()) {
 
         window.location.href = "/";
@@ -175,11 +176,12 @@ function Dashboard() {
 
       }
 
+      // 🔥 ESTATÍSTICAS
       const res = await api.get("/estatisticas");
 
       setDados(res.data);
 
-      // 🔥 ADMIN
+      // 🔥 SOMENTE ADMIN
       if (usuario?.tipo === "admin") {
 
         const membros = await api.get(
@@ -233,7 +235,7 @@ function Dashboard() {
       console.error(error);
     }
 
-  }, [usuario?.tipo]);
+  }, [usuario]);
 
   // ================= USE EFFECT =================
   useEffect(() => {
@@ -271,7 +273,9 @@ function Dashboard() {
 
       }
 
-      toast.error("Erro ao filtrar dados");
+      toast.error(
+        "Erro ao filtrar dados"
+      );
     }
   }
 
@@ -329,7 +333,10 @@ function Dashboard() {
 
   const dataStatus = {
 
-    labels: ["Ativos", "Inativos"],
+    labels: [
+      "Ativos",
+      "Inativos"
+    ],
 
     datasets: [
       {
@@ -397,7 +404,6 @@ function Dashboard() {
       <div style={styles.totalGeral}>
 
         👥 Total Geral de Membros:
-
         <strong>
           {" "}
           {dados.total_membros}
@@ -405,6 +411,7 @@ function Dashboard() {
 
       </div>
 
+      {/* 🔥 CARDS */}
       <div style={styles.cards}>
 
         <div style={styles.cardGreen}>
@@ -421,10 +428,10 @@ function Dashboard() {
 
       </div>
 
-      {/* 🔥 ADMIN */}
+      {/* 🔥 SOMENTE ADMIN */}
       {usuario?.tipo === "admin" && (
-        <>
 
+        <>
           <div style={styles.filtro}>
 
             <input
@@ -441,7 +448,9 @@ function Dashboard() {
               }
             />
 
-            <button onClick={filtrarDizimos}>
+            <button
+              onClick={filtrarDizimos}
+            >
               Filtrar
             </button>
 
@@ -490,7 +499,6 @@ function Dashboard() {
             </div>
 
           </div>
-
         </>
       )}
 
